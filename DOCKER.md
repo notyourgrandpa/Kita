@@ -56,5 +56,19 @@ to exclude the frontend project and `SkipSqlLogging=true` to avoid connecting to
 SQL Server while building the bundle. Build-only placeholders are replaced by
 the configured connection at runtime.
 
-Historical release and feature branches are preserved separately; their unmerged
-release Compose files have not been silently added to main.
+## Tagged release images
+
+`compose.release-build.yml` builds tagged `kita-backend`, `kita-frontend`, and
+`kita-migrate` images from the Kita project paths. `compose.release.yml` runs
+those images. It retains the default Compose project name and SQL database name.
+Set RELEASE_TAG, SQL_PASSWORD, APP_ORIGIN, ADMIN_PASSWORD, USER_PASSWORD,
+JWT_ISSUER, JWT_AUDIENCE, JWT_KEY, and WEB_PORT in your deployment environment.
+Keep any existing `-p` override when adopting this configuration.
+
+```sh
+docker compose -f compose.release.yml -f compose.release-build.yml --profile tools build
+docker compose -f compose.release.yml up -d db
+# After the database is ready:
+docker compose -f compose.release.yml --profile tools run --rm migrate
+docker compose -f compose.release.yml up -d backend frontend
+```

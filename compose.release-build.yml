@@ -1,0 +1,18 @@
+services:
+  backend:
+    image: kita-backend:${RELEASE_TAG:?Set RELEASE_TAG first}
+    build:
+      context: .
+      dockerfile: Kita.Server/Dockerfile
+
+  frontend:
+    image: kita-frontend:${RELEASE_TAG:?Set RELEASE_TAG first}
+    build:
+      context: ./Kita.Client
+      dockerfile: Dockerfile
+
+  migrate:
+    image: kita-migrate:${RELEASE_TAG:?Set RELEASE_TAG first}
+    build:
+      context: .
+      dockerfile: Kita.Infrastructure/Dockerfile.migrations

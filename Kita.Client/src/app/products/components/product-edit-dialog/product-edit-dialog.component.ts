@@ -63,6 +63,7 @@ export class ProductEditDialogComponent extends BaseFormComponent implements OnI
   ngOnInit() {
     this.form = new FormGroup({
       name: new FormControl(''),
+      productCode: new FormControl('', Validators.required),
       categoryId: new FormControl('', Validators.required),
       costPrice: new FormControl('', [Validators.required, Validators.pattern(/^[-]?[0-9]+(\.[0-9]{1,2})?$/)]),
       sellingPrice: new FormControl('', [Validators.required, Validators.pattern(/^[-]?[0-9]+(\.[0-9]{1,2})?$/)]),
@@ -153,6 +154,7 @@ export class ProductEditDialogComponent extends BaseFormComponent implements OnI
     var product = (this.id) ? this.product : <Product>{};
     if (product) {
       product.name = this.form.controls['name'].value;
+      product.productCode = this.form.controls['productCode'].value;
       product.categoryId = +this.form.controls['categoryId'].value;
       product.costPrice = +this.form.controls['costPrice'].value;
       product.sellingPrice = +this.form.controls['sellingPrice'].value;
@@ -215,6 +217,7 @@ export class ProductEditDialogComponent extends BaseFormComponent implements OnI
       var product = <Product>{};
       product.id = (this.id) ? this.id : 0;
       product.name = this.form.controls['name'].value;
+      product.productCode = this.form.controls['productCode'].value;
       product.categoryId = +this.form.controls['categoryId'].value;
       product.costPrice = +this.form.controls['costPrice'].value;
       product.sellingPrice = +this.form.controls['sellingPrice'].value;

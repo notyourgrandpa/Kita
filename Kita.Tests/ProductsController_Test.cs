@@ -42,6 +42,7 @@ public class ProductsController_Test
         var product = Assert.IsType<ProductDTO>(result.Value);
         Assert.Equal(1, product.Id);
         Assert.Equal("TestProduct1", product.Name);
+        Assert.Equal("Product-123", product.ProductCode);
         Assert.Equal("Test category", product.CategoryName);
 
         // Missing products are mapped to HTTP responses by the exception middleware.

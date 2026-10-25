@@ -25,13 +25,17 @@ export class ExpensesComponent implements OnInit {
     'date'
   ];
   public expenses!: MatTableDataSource<ExpensesModel>;
+  isLoading = true;
 
   defaultPageIndex = 0;
   defaultPageSize = 10;
   public defaultSortColumn = "date";
   public defaultSortOrder: "asc" | "desc" = "asc";
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
+
   @ViewChild(MatSort) sort!: MatSort;
 
   filterTextChanged: Subject<string> = new Subject<string>();
@@ -48,6 +52,7 @@ export class ExpensesComponent implements OnInit {
   }
 
   loadData(query?: string) {
+    this.isLoading = true;
     var pageEvent = new PageEvent;
     pageEvent.pageIndex = this.defaultPageIndex;
     pageEvent.pageSize = this.defaultPageSize;
@@ -78,12 +83,14 @@ export class ExpensesComponent implements OnInit {
       filterQuery)
       .subscribe({
         next: (result) => {
-          this.paginator.length = result.totalCount;
-          this.paginator.pageIndex = result.pageIndex;
-          this.paginator.pageSize = result.pageSize;
+          this.isLoading = false;
+          this.totalCount = result.totalCount;
+          this.pageIndex = result.pageIndex;
+          this.pageSize = result.pageSize;
           this.expenses = new MatTableDataSource<ExpensesModel>(result.data);
         },
         error: (error) => {
+          this.isLoading = false;
           console.log(error);
         }
       })

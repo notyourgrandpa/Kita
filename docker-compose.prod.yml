@@ -1,6 +1,7 @@
 services:
   db:
-    ports: !reset []
+    ports: !override
+      - "127.0.0.1:1435:1433"
     restart: unless-stopped
     logging:
       driver: json-file

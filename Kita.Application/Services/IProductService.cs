@@ -14,8 +14,6 @@ namespace Kita.Application.Services
     public interface IProductService
     {
         Task<Product?> GetProductAsync(int productId);
-        Task<ProductDTO> CreateProductAsync(ProductCreateDTO productCreateDTO);
-        Task<bool> UpdateProductAsync(int productId, ProductUpdateDTO productUpdateDTO);
         Task UpdateStockAsync(InventoryLog inventoryLog);
         Task<bool> IsDupeProduct(Product product);
         Task<bool> ProductExistsAsync(int productId);

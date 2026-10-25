@@ -51,6 +51,18 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker compose config --quiet
       - run: docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
+      - name: Validate release Compose configuration
+        env:
+          RELEASE_TAG: ci
+          SQL_PASSWORD: CIOnlyPlaceholderDatabase123!
+          APP_ORIGIN: http://localhost:4200
+          ADMIN_PASSWORD: CIOnlyPlaceholderAdmin123!
+          USER_PASSWORD: CIOnlyPlaceholderUser123!
+          JWT_ISSUER: kita-ci
+          JWT_AUDIENCE: kita-ci
+          JWT_KEY: CIOnlyPlaceholderSecurityKey123456789!
+          WEB_PORT: '8081'
+        run: docker compose -f compose.release.yml -f compose.release-build.yml --profile tools config --quiet
       - run: docker build -f Kita.Server/Dockerfile -t kita-server:ci .
       - run: docker build -f Kita.Client/Dockerfile -t kita-client:ci Kita.Client
       - run: docker build -f Kita.Infrastructure/Dockerfile.migrations -t kita-migrations:ci .

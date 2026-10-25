@@ -37,6 +37,7 @@ namespace Kita.Application.Products.Queries
             {
                 Id = product.Id,
                 Name = product.Name,
+                ProductCode = product.ProductCode,
                 SellingPrice = product.SellingPrice,
                 CostPrice = product.CostPrice,
                 IsActive = product.IsActive,

@@ -26,6 +26,7 @@ namespace Kita.Application.Products.Commands
             }
 
             product.Name = request.ProductUpdateDTO.Name;
+            product.ProductCode = request.ProductUpdateDTO.ProductCode;
             product.CostPrice = request.ProductUpdateDTO.CostPrice;
             product.SellingPrice = request.ProductUpdateDTO.SellingPrice;
             product.IsActive = request.ProductUpdateDTO.IsActive;
