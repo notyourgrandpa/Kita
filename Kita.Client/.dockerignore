@@ -1,0 +1,9 @@
+node_modules
+dist
+.angular
+obj
+bin
+coverage
+.vscode
+*.pem
+*.key

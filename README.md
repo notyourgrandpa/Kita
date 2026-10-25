@@ -1,133 +1,85 @@
-# GeneralPurposeApplication  
-A collection of applications I develop.  
+# Kita
 
-## Technologies Used  
-- **.NET 8 SDK** (Version 8.0.101)  
-- **TypeScript** (Version 5.2)  
-- **NuGet Package Manager** (Version 6.8.0)  
-- **Node.js** (Version 20.10.0)  
-- **Angular** (Version 17.0.3)
+A sari-sari store management system for tracking inventory, sales, and expenses.
+Under development.
 
-## Dependencies
+## Projects
 
-| Package              | Version     | Description                    |
-|----------------------|-------------|--------------------------------|
-| Serilog              | 2.12.0      | Logging framework              |
-| EF Core              | 8.0.14      | ORM for .NET Core              |
-| EF Core Sql Server   | 8.0.14      | Database provider for EF Core  |
-| Moq                  | 13.0.1      | Mocking framework              |
-| EPPlus               | 4.5.3.3     | Spreadsheet library            |
-| EF Core InMemory     | 8.0.14      | Database Mock                  |
-| HotChocolate         | 13.0.14     | GraphQL bridge for AspNetCore  |
+- `Kita.Client` — Angular frontend.
+- `Kita.Server` — ASP.NET Core API.
+- `Kita.Application` — application services and use cases.
+- `Kita.Domain` — domain models and contracts.
+- `Kita.Infrastructure` — persistence, identity, and integrations.
+- `Kita.Tests` — backend tests.
 
-## Description  
-- This repository contains various simple applications I have developed/been developing using .NET and Angular.
-- All applications listed are those I think will be useful on my/other's everyday life.
-- This will be part of my study, knowledge acquisition, and familiarization for Angular and TypeScript
+## Local development
 
+Requires the .NET 8 SDK (or a compatible newer SDK), Node.js 20, and SQL Server.
+Dependency versions are defined in the project files and the client lockfile.
 
+```powershell
+git clone https://github.com/notyourgrandpa/Kita.git
+cd Kita
+dotnet tool restore
+cd Kita.Client
+npm ci
+cd ..
+```
 
+Configure your SQL Server connection string, JWT signing key, and seed-user
+passwords using user secrets for `Kita.Server`. The existing UserSecretsId is
+preserved, so developers migrating from GPA retain their existing secrets.
 
-## Applications
-1. Kita - Variety Store Management System - Under Development
-   - _My mother have a sari-sari store. If I make a sari-sari store management system, it might help her._
-   - For Sari-Sari store owners to track item stocks, as well as track daily revenues.
+```powershell
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<your SQL Server connection string>" --project Kita.Server
+dotnet user-secrets set "JwtSettings:SecurityKey" "<your signing key, at least 32 bytes>" --project Kita.Server
+dotnet user-secrets set "DefaultPasswords:RegisteredUser" "<your seed-user password>" --project Kita.Server
+dotnet user-secrets set "DefaultPasswords:Administrator" "<your seed-admin password>" --project Kita.Server
+```
 
-2. Motorcycle Maintenance Tracker - PLANNED
-   - _I can't remember when I last changed my engine oil. I should make an application for this!!!_
-   - For Motorcycle owners to track timely maintenance for their motorcycles
-   - Might include - Tracking of mileage of user for change engine oil
+Apply the existing migrations to your development database:
 
-3. Password Manager & Vault - PLANNED
-   - _I have so many accounts; there's my 10+ gmail account, my old crossfire account, lol accounts..... What's my password again?!!_
-   - For users like me who have many accounts and forgetful enough to remember their 10+ accounts but also wants it to be secure.
+```powershell
+dotnet ef database update --project Kita.Infrastructure --startup-project Kita.Server -- --SkipSqlLogging=true
+```
 
-4. Water me, Plantito - PLANNED
-   - _I love watering my plant, I love taking care of my plants, I love my plants! I should create an app because I love plants!!!!!!!!!!_
-   - Track plant watering intervals.
-   - Note every plant details.
-   - Contains plants dictionary. It might contain informations like "Beware, this plant is p%^&%^*^&."
+Run the backend:
 
-5. Budget tracker??? - PLANNED
-   - _I need an application to allocate my funds per day so I can budget my money more efficiently._
-   - Allocate funds per day.
-   - Calendar view for each added budget allocation.
-   - Chartts for viewing budget allocation and how much spent.
-  
-6. What's the Fodo for today???? - PLANNED
-   - _I want to track my food stocks on my refrigerator; I need an app for this._
-   - List the ingredients when planming to from the list of food stocks.
-   - Automatically manage the food stocks based on the added ingredients for the planned meal.
-   - Ingredients for planned meal are not on the stock? Add a temporary ingredients for that.
+```powershell
+dotnet run --project Kita.Server --launch-profile https
+```
 
-7. Test your Japanese! - Under Development
-   - _I'm learning Japanese, there should be an app to test my japanese writing, reading, and listening skills!._
-   - Select your Hiragana, Katakana, Kanji alphabet for recognizing random alphabets.
-   - Learn Japanese Alphabet.
-  
+The SPA proxy can start the frontend automatically. To run it separately:
+
+```powershell
+cd Kita.Client
+npm start
+```
+
+The client uses HTTPS at `https://localhost:4200`; its prestart script exports the
+development certificate under the new `kita.client` name. If needed, trust the
+certificate using `dotnet dev-certs https --trust`. The API runs at
+`https://localhost:8701`.
+
+## Verification
+
+```powershell
+dotnet test Kita.Tests/Kita.Tests.csproj -p:DockerBuild=true
+cd Kita.Client
+npm run build
+npm test -- --watch=false --browsers=EdgeHeadless
+```
+
+`DockerBuild=true` excludes the JavaScript project from the backend build;
+the client is built separately using npm.
+
 ## Documentation
 
-- [User Guide](GUIDE.md)
+- [Docker setup](DOCKER.md)
 - [FAQ](FAQ.md)
 - [Troubleshooting](TROUBLESHOOTING.md)
-- [Docker](DOCKER.md)
-  
-## Getting Started  
-1. Clone the repository:  
-   ```sh
-   git clone https://github.com/your-username/GeneralPurposeApplication.git
-   cd GeneralPurposeApplication
-   ```
-2. Install dependencies:
-   ```sh
+- [Repository migration](docs/REPOSITORY-MIGRATION.md)
 
-   cd generalpurposeapplication.client
-   ```
-   ```sh
-   npm install
-   ```
-
-3. Configure database connection (User Secrets or appsettings.json):
-   ```
-      {
-        "ConnectionStrings": {
-             "DefaultConnection": "Server=SAMPLEDESKTOP\\SQLEXPRESS;Database=GeneralPurposeApplication;User Id=GeneralPurposeApplication;Password=SamplePassword;TrustServerCertificate=True;MultipleActiveResultSets=True"
-        }
-      }
-   ```
-
-5. Migrate (Or use provided sample database):
-   ```
-   dotnet ef migrations add "Initial" -o "Data/Migrations"
-   ```
-   ```
-   dotnet ef database update
-   ```
-6. Populate database using Seed (If taken Migrate Path):  
-   * Creating default users requires "DefaultPasswords" on secrets.json/appsettings.json):
-   - secrets.json/appsettings.json:
-   ```
-   "DefaultPasswords": {
-     "RegisteredUser": "Sampl3Pa$$_User",
-     "Administrator": "Sampl3Pa$$_Admin"
-   }
-   ```
-   - Create default users:
-   ```
-   https://localhost:8701/api/Seed/CreateDefaultUsers
-   ```
-   - Create products from Excel file:
-   ```
-   https://localhost:8701/api/Seed/Import:
-   ```
-   
-7. Run the application:
-   - Start the backend (ASP.NET Core):
-      ```sh
-      dotnet run
-      ```
-   - Start the frontend (Angular)
-      ```sh
-      ng serve
-      ```
-    
+Kita was extracted from
+[GeneralPurposeApplication](https://github.com/notyourgrandpa/GeneralPurposeApplication),
+which now serves as the project directory. The application's Git history is preserved.

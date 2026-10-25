@@ -1,0 +1,6 @@
+@Kita.Server_HostAddress = http://localhost:5122
+
+GET {{Kita.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

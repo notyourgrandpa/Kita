@@ -1,0 +1,56 @@
+name: Verify Kita
+
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: Kita.Client/package-lock.json
+      - run: dotnet test Kita.Tests/Kita.Tests.csproj -p:DockerBuild=true --configuration Release
+      - run: dotnet tool restore
+      - name: Check EF model matches migration snapshot
+        env:
+          DockerBuild: 'true'
+          SkipSqlLogging: 'true'
+          JwtSettings__SecurityKey: 'CIOnlyPlaceholderSecurityKey123456789!'
+          ConnectionStrings__DefaultConnection: 'Server=localhost;Database=GeneralPurposeApplication;Integrated Security=True;TrustServerCertificate=True'
+        run: dotnet ef migrations has-pending-model-changes --project Kita.Infrastructure --startup-project Kita.Server --configuration Release --no-build
+      - run: npm ci --no-audit --no-fund
+        working-directory: Kita.Client
+      - run: npm run build
+        working-directory: Kita.Client
+      - run: npm test -- --watch=false --browsers=ChromeHeadless
+        working-directory: Kita.Client
+
+  containers:
+    runs-on: ubuntu-latest
+    env:
+      DB_SA_PASSWORD: 'CIOnlyPlaceholderDatabase123!'
+      JWT_SECURITY_KEY: 'CIOnlyPlaceholderSecurityKey123456789!'
+      DEFAULT_PASSWORD_USER: 'CIOnlyPlaceholderUser123!'
+      DEFAULT_PASSWORD_ADMIN: 'CIOnlyPlaceholderAdmin123!'
+      ALLOWED_CORS_ORIGIN: 'http://localhost:4200'
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
+      - run: docker build -f Kita.Server/Dockerfile -t kita-server:ci .
+      - run: docker build -f Kita.Client/Dockerfile -t kita-client:ci Kita.Client
+      - run: docker build -f Kita.Infrastructure/Dockerfile.migrations -t kita-migrations:ci .
