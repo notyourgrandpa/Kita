@@ -35,8 +35,8 @@ the server restore explicitly excludes the JavaScript project.
 - Original Angular build and renamed Angular build pass with the same bundle hashes.
 - Backend tests: 3 passed after repairing pre-existing stale test fixtures.
 - EF model comparison: no changes since the last migration.
-- Browser tests, startup checks, and Linux CI results are recorded at completion.
-- CI builds the application and all three Docker images and validates Compose.
+- Browser tests: all 3 pass in Linux CI; API readiness returns HTTP 200 locally.
+- [Linux CI run 40196687897](https://github.com/notyourgrandpa/Kita/actions/runs/40196687897) passed the application checks, all three Docker image builds, and both Compose configurations.
 - Existing nullable/decimal-precision and Angular bundle-size warnings are outside
   this repository migration.
 
@@ -44,6 +44,8 @@ The product fixture now exercises the current query handler and DTO/error
 contract. The seed fixture uses the real seed service, isolated in-memory storage,
 and password hashing, including an idempotence assertion. Client fixtures use
 the current product/category service methods.
+
+Swagger generation returns HTTP 500 in both the original and renamed builds because ProductsController.IsDupeProduct lacks an explicit HTTP method attribute. This pre-existing API documentation issue is unchanged.
 
 No live production database or deployment has been modified. Existing deployments
 must retain their Compose project identity and configuration when adopting Kita.
