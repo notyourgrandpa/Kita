@@ -1,0 +1,33 @@
+# Build the EF Core migration bundle
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /src
+
+COPY . .
+
+RUN dotnet tool install --global dotnet-ef --version 8.0.16
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Skips the Angular .esproj reference in Server.csproj (no Node.js in this image)
+ENV DockerBuild=true
+
+RUN dotnet restore Kita.Server/Kita.Server.csproj
+
+RUN SkipSqlLogging=true \
+    JwtSettings__SecurityKey="BuildOnlyPlaceholderSecurityKey123456789!" \
+    ConnectionStrings__DefaultConnection="Server=localhost;Database=GeneralPurposeApplication;User Id=sa;Password=BuildOnlyPlaceholder123!;TrustServerCertificate=True" \
+    dotnet ef migrations bundle \
+    --project Kita.Infrastructure \
+    --startup-project Kita.Server \
+    --configuration Release \
+    --output /app/efbundle \
+    --verbose
+
+# Run migrations using the smaller runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+WORKDIR /app
+
+COPY --from=build /app/efbundle ./efbundle
+
+ENTRYPOINT ["./efbundle"]

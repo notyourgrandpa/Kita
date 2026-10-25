@@ -1,3 +1,7 @@
+# Preserve the old default Compose project and persistent volume names.
+# Existing installations using -p or COMPOSE_PROJECT_NAME must keep that value.
+name: generalpurposeapplication
+
 services:
 
   db-health:
@@ -38,7 +42,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: GeneralPurposeApplication.Server/Dockerfile
+      dockerfile: Kita.Server/Dockerfile
 
     depends_on:
       db-health:
@@ -60,7 +64,7 @@ services:
 
   frontend:
     build:
-      context: ./GeneralPurposeApplication.Client
+      context: ./Kita.Client
       dockerfile: Dockerfile
     ports:
       - "4200:80"

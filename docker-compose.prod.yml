@@ -40,7 +40,7 @@ services:
   migrate:
     build:
       context: .
-      dockerfile: GeneralPurposeApplication.Infrastructure/Dockerfile.migrations
+      dockerfile: Kita.Infrastructure/Dockerfile.migrations
     environment:
       ConnectionStrings__DefaultConnection: "Server=db,1433;Database=GeneralPurposeApplication;User Id=sa;Password=${DB_SA_PASSWORD};TrustServerCertificate=True"
     command:
