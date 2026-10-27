@@ -42,10 +42,10 @@ services:
     profiles:
       - tools
     environment:
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=GeneralPurposeApplication;User Id=sa;Password=${SQL_PASSWORD:?Set SQL_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=Kita;User Id=sa;Password=${SQL_PASSWORD:?Set SQL_PASSWORD};TrustServerCertificate=True"
     command:
       - --connection
-      - "Server=db,1433;Database=GeneralPurposeApplication;User Id=sa;Password=${SQL_PASSWORD:?Set SQL_PASSWORD};TrustServerCertificate=True"
+      - "Server=db,1433;Database=Kita;User Id=sa;Password=${SQL_PASSWORD:?Set SQL_PASSWORD};TrustServerCertificate=True"
 
 volumes:
   sqlserver_data:

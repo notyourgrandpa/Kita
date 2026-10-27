@@ -43,10 +43,10 @@ services:
       context: .
       dockerfile: Kita.Infrastructure/Dockerfile.migrations
     environment:
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=GeneralPurposeApplication;User Id=sa;Password=${DB_SA_PASSWORD};TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=Kita;User Id=sa;Password=${DB_SA_PASSWORD};TrustServerCertificate=True"
     command:
       - "--connection"
-      - "Server=db,1433;Database=GeneralPurposeApplication;User Id=sa;Password=${DB_SA_PASSWORD};TrustServerCertificate=True"
+      - "Server=db,1433;Database=Kita;User Id=sa;Password=${DB_SA_PASSWORD};TrustServerCertificate=True"
     depends_on:
       db-health:
         condition: service_completed_successfully

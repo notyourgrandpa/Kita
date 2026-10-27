@@ -14,7 +14,7 @@ RUN dotnet restore Kita.Server/Kita.Server.csproj
 
 RUN SkipSqlLogging=true \
     JwtSettings__SecurityKey="BuildOnlyPlaceholderSecurityKey123456789!" \
-    ConnectionStrings__DefaultConnection="Server=localhost;Database=GeneralPurposeApplication;User Id=sa;Password=BuildOnlyPlaceholder123!;TrustServerCertificate=True" \
+    ConnectionStrings__DefaultConnection="Server=localhost;Database=Kita;User Id=sa;Password=BuildOnlyPlaceholder123!;TrustServerCertificate=True" \
     dotnet ef migrations bundle \
     --project Kita.Infrastructure \
     --startup-project Kita.Server \

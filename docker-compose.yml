@@ -52,7 +52,7 @@ services:
       - "8080:8080"
 
     environment:
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=GeneralPurposeApplication;User Id=sa;Password=${DB_SA_PASSWORD};Integrated Security=False;MultipleActiveResultSets=True;TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=Kita;User Id=sa;Password=${DB_SA_PASSWORD};Integrated Security=False;MultipleActiveResultSets=True;TrustServerCertificate=True"
 
       JwtSettings__Issuer: "12345678-Grandpa"
       JwtSettings__Audience: "12345678-Grandpa-Users"
