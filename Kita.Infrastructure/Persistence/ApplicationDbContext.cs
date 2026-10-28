@@ -1,26 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Kita.Infrastructure.Identity;
+﻿using Kita.Application.Common.Interfaces;
+using Kita.Application.Services;
 using Kita.Domain.Categories;
+using Kita.Domain.Customers;
 using Kita.Domain.Expenses;
 using Kita.Domain.Inventory;
 using Kita.Domain.Products;
 using Kita.Domain.Sales;
-using Kita.Domain.Customers;
-using Kita.Application.Common.Interfaces;
-using Kita.Application.Services;
+using Kita.Infrastructure.Identity;
+using Kita.Infrastructure.Persistence.Auditing;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kita.Infrastructure.Persistence
 {
     public class ApplicationDbContext: IdentityDbContext<ApplicationUser>, IApplicationDbContext
     {
-        private readonly ICurrentUserService? _currentUserService;
+        private readonly IAuditActorProvider _auditActorProvider;
 
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options,
-            ICurrentUserService? currentUserService = null) : base(options)
+            IAuditActorProvider auditActorProvider) : base(options)
         {
-            _currentUserService = currentUserService;
+            _auditActorProvider = auditActorProvider;
         }
 
         public DbSet<Category> Categories => Set<Category>();
@@ -31,60 +32,118 @@ namespace Kita.Infrastructure.Persistence
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+
+        public override async Task<int> SaveChangesAsync(
+            CancellationToken cancellationToken = default)
         {
-            var auditEntries = new List<AuditLog>();
+            var auditLogs = PrepareAuditLogs();
+
+            try
+            {
+                return await base.SaveChangesAsync(cancellationToken);
+            }
+            catch
+            {
+                DetachAuditLogs(auditLogs);
+                throw;
+            }
+        }
+
+        public override int SaveChanges()
+        {
+            var auditLogs = PrepareAuditLogs();
+
+            try
+            {
+                return base.SaveChanges();
+            }
+            catch
+            {
+                DetachAuditLogs(auditLogs);
+                throw;
+            }
+        }
+
+        private List<AuditLog> PrepareAuditLogs()
+        {
+            ChangeTracker.DetectChanges();
+
+            var auditLogs = new List<AuditLog>();
 
             var entries = ChangeTracker.Entries()
-                .Where(e => e.State == EntityState.Added
-                         || e.State == EntityState.Modified
-                         || e.State == EntityState.Deleted);
+                .Where(e =>
+                    AuditPolicy.ShouldAudit(e.Metadata.ClrType) &&
+                    e.State is EntityState.Added
+                        or EntityState.Modified
+                        or EntityState.Deleted)
+                .ToList();
 
-            foreach (var e in entries)
+            foreach (var entry in entries)
             {
-                // Build a canonical string key from primary key properties (supports composite keys)
-                var pk = e.Metadata.FindPrimaryKey();
+                var changedProperties = entry.Properties
+                    .Where(p =>
+                        entry.State != EntityState.Modified ||
+                        p.IsModified)
+                    .Select(p => p.Metadata.Name)
+                    .OrderBy(name => name)
+                    .ToList();
+
+                if (changedProperties.Count == 0)
+                    continue;
+
+                var primaryKey = entry.Metadata.FindPrimaryKey();
+
                 string? entityKey = null;
                 int entityId = 0;
 
-                if (pk != null)
+                if (primaryKey != null)
                 {
-                    var keyParts = pk.Properties.Select(p =>
-                    {
-                        var prop = e.Property(p.Name);
-                        var cv = prop.CurrentValue;
-                        return cv?.ToString() ?? "null";
-                    });
+                    var keyProperties = primaryKey.Properties
+                        .Select(p => entry.Property(p.Name))
+                        .ToList();
 
-                    entityKey = string.Join(":", keyParts);
-
-                    // If single int key, try to parse for EntityId convenience
-                    if (pk.Properties.Count == 1)
+                    // Do not record temporary/generated keys
+                    // before they have been persisted.
+                    if (keyProperties.All(p => !p.IsTemporary))
                     {
-                        var singleVal = pk.Properties[0];
-                        var propVal = e.Property(singleVal.Name).CurrentValue;
-                        if (propVal is int i)
-                            entityId = i;
-                        else if (propVal != null)
-                            int.TryParse(propVal.ToString(), out entityId);
+                        entityKey = string.Join(":",
+                            keyProperties.Select(p =>
+                                p.CurrentValue?.ToString() ?? "null"));
+
+                        if (keyProperties.Count == 1 &&
+                            keyProperties[0].CurrentValue is int id)
+                        {
+                            entityId = id;
+                        }
                     }
                 }
 
-                auditEntries.Add(new AuditLog
+                auditLogs.Add(new AuditLog
                 {
-                    Action = e.State.ToString(),
-                    EntityName = e.Entity.GetType().Name,
+                    Date = DateTime.UtcNow,
+                    Action = entry.State.ToString(),
+                    EntityName = entry.Metadata.ClrType.Name,
                     EntityId = entityId,
                     EntityKey = entityKey,
-                    PerformedBy = _currentUserService?.UserId ?? "Unknown",
-                    Changes = string.Join(", ", e.Properties
-                        .Select(p => $"{p.Metadata.Name}: {p.CurrentValue}"))
+                    PerformedBy = _auditActorProvider.ActorId,
+                    Changes = string.Join(", ", changedProperties)
                 });
             }
 
-            AuditLogs.AddRange(auditEntries);
-            return await base.SaveChangesAsync(cancellationToken);
+            if (auditLogs.Count > 0)
+                AuditLogs.AddRange(auditLogs);
+
+            return auditLogs;
         }
+
+        private void DetachAuditLogs(IEnumerable<AuditLog> auditLogs)
+        {
+            foreach (var auditLog in auditLogs)
+            {
+                Entry(auditLog).State = EntityState.Detached;
+            }
+        }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

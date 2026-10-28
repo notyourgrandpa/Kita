@@ -4,15 +4,16 @@ using Microsoft.EntityFrameworkCore.Design;
 namespace Kita.Infrastructure.Persistence;
 
 /// <summary>
-/// Creates contexts for EF tooling and migration bundles without starting the web host.
+/// Creates contexts for EF tooling and migration bundles
+/// without starting the web host.
 /// </summary>
-public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+public sealed class ApplicationDbContextFactory
+    : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
     public ApplicationDbContext CreateDbContext(string[] args)
     {
-        // Compose supplies this at runtime; bundle builds supply it in the Dockerfile.
-        // EF applies the bundle's --connection override after creating the context.
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+        var connectionString = Environment.GetEnvironmentVariable(
+            "ConnectionStrings__DefaultConnection");
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
@@ -24,6 +25,10 @@ public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Ap
             .UseSqlServer(connectionString)
             .Options;
 
-        return new ApplicationDbContext(options);
+        var auditActorProvider = new DesignTimeAuditActorProvider();
+
+        return new ApplicationDbContext(
+            options,
+            auditActorProvider);
     }
 }
