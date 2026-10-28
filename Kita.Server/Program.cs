@@ -1,34 +1,36 @@
 ﻿global using Kita.Server;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-using Serilog.Events;
-using Serilog.Sinks.MSSqlServer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Cors;
-using Kita.Server.Data.GraphQL;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.Diagnostics;
-using Kita.Infrastructure.Persistence;
-using Kita.Infrastructure.Identity;
-using Kita.Server.Data;
-using Kita.Domain.Abstractions;
-using Kita.Application.Services;
-using Kita.Infrastructure.Services;
-using Kita.Infrastructure.Repositories;
-using Kita.Application.Common.Interfaces;
 using FluentValidation;
-using Kita.Application.Customers.Queries;
-using Kita.Application.Common;
-using MediatR;
-using Kita.Application.Common.Behaviors;
 using Kita.Application.Categories.Commands;
+using Kita.Application.Categories.Queries;
+using Kita.Application.Common;
+using Kita.Application.Common.Behaviors;
+using Kita.Application.Common.Interfaces;
+using Kita.Application.Customers.Queries;
+using Kita.Application.Services;
+using Kita.Domain.Abstractions;
+using Kita.Infrastructure;
+using Kita.Infrastructure.Identity;
+using Kita.Infrastructure.Persistence;
 using Kita.Infrastructure.Persistence.Querying;
 using Kita.Infrastructure.Persistence.Querying.Filtering;
 using Kita.Infrastructure.Persistence.Querying.Sorting;
-using Kita.Application.Categories.Queries;
+using Kita.Infrastructure.Repositories;
+using Kita.Infrastructure.Services;
+using Kita.Server.Data;
+using Kita.Server.Data.GraphQL;
+using Kita.Server.Services;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
 using Path = System.IO.Path;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,25 +78,10 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSignalR();
 
-// Add ApplicationDbContext and SQL Server support
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+builder.Services.AddKitaIdentity(builder.Configuration);
 
 builder.Services.AddScoped<IApplicationDbContext>(provider =>
     provider.GetRequiredService<ApplicationDbContext>());
-
-// Add ASP.NET Core Identity support
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = true;
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 8;
-})
-   .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<JwtHandler>();
@@ -107,6 +94,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<ISeedService, SeedService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IAuditActorProvider, HttpAuditActorProvider>();
 //builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddScoped<IUserLookupService, UserLookupService>();
 builder.Services.AddScoped<IQueryExecutor, EfQueryExecutor>();
