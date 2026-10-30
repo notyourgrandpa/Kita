@@ -1,0 +1,11 @@
+services:
+  backend:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+  frontend:
+    ports: !override
+      - "127.0.0.1:8082:80"
+
+  db:
+    ports: !override
+      - "127.0.0.1:1436:1433"
