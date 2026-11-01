@@ -37,6 +37,7 @@ import { InventoryLogDetailsComponent } from './inventory-logs/components/invent
 import { ProductEditDialogComponent } from './products/components/product-edit-dialog/product-edit-dialog.component';
 import { DataMaintenanceComponent } from './administration/components/data-maintenance/data-maintenance.component';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { ProductDetailsDialogComponent } from './products/components/product-details-dialog/product-details-dialog.component';
 
 @NgModule({
   declarations: [
@@ -62,6 +63,7 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
     InventoryLogDetailsComponent,
     ProductEditDialogComponent,
     DataMaintenanceComponent,
+    ProductDetailsDialogComponent,
   ],
   imports: [
     BrowserModule,

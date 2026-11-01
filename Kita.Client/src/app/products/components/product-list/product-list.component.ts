@@ -11,6 +11,7 @@ import { Category } from '../../../categories/models/category';
 import { CategoryQueryParams } from '../../../inventory-logs/models/category-query-params';
 import { CategoryService } from '../../../categories/services/category.service';
 import { ProductEditDialogComponent } from '../product-edit-dialog/product-edit-dialog.component';
+import { ProductDetailsDialogComponent } from '../product-details-dialog/product-details-dialog.component';
 import { AuthService } from '../../../auth/auth.service';
 import { Router } from '@angular/router';
 import { Unit } from '../../models/unit';
@@ -216,6 +217,13 @@ export class ProductListComponent implements OnChanges {
       if (result) {
         this.loadData();
       }
+    });
+  }
+
+  openProductViewDialog(productId: number = 0){
+    this.dialog.open(ProductDetailsDialogComponent, {
+      width: '600px',
+      data: { productId: productId }
     });
   }
 }
