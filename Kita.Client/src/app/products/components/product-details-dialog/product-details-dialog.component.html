@@ -1,1 +1,50 @@
-<p>product-details-dialog works!</p>
+<div class="p-4">
+    <div class="flex justify-between">
+        <p class="text-gray-700 text-[10px]">DETAILS</p>
+        <button class="text-gray-700 text-[10px]" mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div class="grid grid-cols-2 gap-4 my-4">
+        <div class="bg-gray-100 rounded-2xl p-1 items-center">
+            <img src="https://picsum.photos/200" alt="{{product?.name}}" class="w-full h-full object-cover rounded-2xl">
+        </div>
+        <div>
+            <div>
+                <div class="flex justify-between align-center">
+                    <h2 class="!font-extrabold">{{product?.name}}</h2>
+                    <div>
+                        <span
+                        class="status-badge"
+                        [class.active]="product?.isActive"
+                        [class.inactive]="!product?.isActive">
+
+                        <span class="status-dot"></span>
+
+                        {{ product?.isActive ? 'Active' : 'Inactive' }}
+
+                    </span>
+                    </div>
+                </div> 
+                <p><span class="font-bold">Unit:</span> {{product?.unitName}}</p>
+                <p><span class="font-bold">Product Code:</span> ₱ {{product?.productCode}}</p>
+                <p><span class="font-bold">Cost Price:</span> ₱ {{product?.costPrice}}</p>
+                <p><span class="font-bold">Selling Price:</span> ₱ {{product?.sellingPrice}}</p>
+                <p><span class="font-bold">Date Added:</span> {{product?.dateAdded}}</p>
+                <p><span class="font-bold">Last Updated:</span> {{product?.lastUpdated}}</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <div class="product-features">
+                    {{product?.categoryName}}
+                </div>
+                <div class="product-features">
+                    {{product?.categoryName}}
+                </div>
+                <div class="product-features">
+                    {{product?.categoryName}}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
