@@ -1,0 +1,4 @@
+/* Keep Tailwind separate so template edits do not rebuild the Material Sass theme. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
